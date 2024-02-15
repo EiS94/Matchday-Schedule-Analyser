@@ -11,7 +11,8 @@ from tqdm import tqdm
 
 class Season:
 
-    def __init__(self, year):
+    def __init__(self, league, year):
+        self.league = league
         self.year = year
         self.teams = []
         # detect min and max matches of all teams in not completed seasons
@@ -32,7 +33,7 @@ class Season:
 
     def analyze_season(self):
         for i in tqdm(range(1, self.max_matches + 1)):
-            url = f"https://api.openligadb.de/getmatchdata/bl1/{self.year}/{i}"
+            url = f"https://api.openligadb.de/getmatchdata/{self.league.value}/{self.year}/{i}"
             request = requests.get(url)
 
             result = json.loads(request.text)
@@ -41,7 +42,7 @@ class Season:
         for matchday in self.matchdays:
             matchday.table = Table.calculate_table(self.teams, matchday.number)
 
-    def analyze_schedule(self, criteria="opponent_ranking"):
+    def analyze_schedule(self, criteria):
         if self.min_matches != self.max_matches:
             print("Not every team has the same amount of matches. This could lead to errors in result.")
 
@@ -53,7 +54,7 @@ class Season:
                 match.away_team.schedule_points += matchday_before.get_team_schedule_points(match.home_team, criteria)
 
         self.teams = sorted(self.teams, key=lambda x: x.schedule_points)
-        if criteria == "opponent_ranking" or criteria == "opponent_shape":
+        if criteria.value == "opponent_ranking" or criteria.value == "opponent_shape":
             for team in self.teams:
                 team.schedule_points = team.schedule_points / self.min_matches
 
@@ -65,15 +66,15 @@ class Season:
         #        f"Error while analyzing schedule: Unknown criteria {criteria}.\nUse one of the following: 'opponent_ranking, '")
 
 
-def create_season(year):
+def create_season(league, year):
     year = int(year) - 1
     if year < 2001 or year > datetime.now().year + 1:
         raise Exception(f"Please select a year between 2001 and {datetime.now().year} + 1")
 
-    season = Season(year)
+    season = Season(league, year)
 
     # detect all teams of the season
-    url = f"https://api.openligadb.de/getbltable/bl1/{year}"
+    url = f"https://api.openligadb.de/getbltable/{league.value}/{year}"
     request = requests.get(url)
     if request.status_code != 200:
         raise Exception(f"Error while getting teams for season {year}\n{url} raised status-code {request.status_code}")
@@ -87,3 +88,14 @@ def create_season(year):
                 season.min_matches = team["matches"]
 
     return season
+
+
+def save_matchdays_of_season(year):
+    year = int(year) - 1
+
+    for i in tqdm(range(1, 35)):
+        url = f"https://api.openligadb.de/getmatchdata/bl1/{year}/{i}"
+        request = requests.get(url)
+        if request.status_code == 200:
+            with open(f"sample_data/{i}.json", "w") as file:
+                file.write(request.text)

@@ -12,11 +12,11 @@ class Matchday:
         counter = 1
         for team_tuple in self.table.ranking:
             if team_tuple[0] == team:
-                if criteria == "opponent_ranking":
+                if criteria.value == "opponent_ranking":
                     return counter
-                elif criteria == "opponent_points":
+                elif criteria.value == "opponent_points":
                     return team_tuple[1]
-                elif criteria == "opponent_shape":
+                elif criteria.value == "opponent_shape":
                     shape_points = 0
                     counter = 0
                     for i in range(3):
