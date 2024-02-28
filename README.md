@@ -33,7 +33,7 @@ Durchschnittliche Punkte der Gegner aus den vorherigen 3 Spielen zum Zeitpunkt d
 
 ### How to use
 
-Customize the main method to get the desired league, year and criterion
+Customize the main class to get the desired league, year and criterion
 
 ```
 import Season
