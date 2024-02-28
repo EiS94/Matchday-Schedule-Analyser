@@ -29,7 +29,7 @@ class Matchday:
                         elif winner == team_tuple[0]:
                             shape_points += 3
                         counter += 1
-                    return shape_points / counter
+                    return shape_points# / counter
             counter += 1
         raise Exception(f"Team {team.name} not found.")
 
